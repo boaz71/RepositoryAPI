@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using RepositoryAPI.Interfaces;
 using RepositoryAPI.Services;
 using System.Text;
 
@@ -57,7 +58,8 @@ builder.Services.AddAuthentication(options =>
  });
 
 builder.Services.AddAuthorization();
-builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IRepositoryService, RepositoryService>();
 
 
 

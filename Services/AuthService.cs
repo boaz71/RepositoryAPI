@@ -1,4 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using RepositoryAPI.Interfaces;
 using RepositoryAPI.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -6,7 +7,7 @@ using System.Text;
 
 namespace RepositoryAPI.Services
 {
-    public class AuthService
+    public class AuthService: IAuthService
     {
         private JwtParameters _jwtParams { get; set; }
 

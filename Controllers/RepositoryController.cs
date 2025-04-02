@@ -1,62 +1,47 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
-using System.Text.Json;
+using RepositoryAPI.Interfaces;
+using System;
 using System.Threading.Tasks;
 
-[Route("api/[controller]")]
-[ApiController]
-[EnableCors("AllowLocalhost")]
-
-public class RepositoryController : ControllerBase
+namespace RepositoryAPI.Controllers
 {
-    private readonly HttpClient _httpClient;
-
-    public RepositoryController(HttpClient httpClient)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class RepositoryController : ControllerBase
     {
-        _httpClient = httpClient;
-    }
+        private readonly IRepositoryService _repositoryService;
 
-
-
-    [HttpGet("search")]
-    [Authorize]
-    public async Task<IActionResult> SearchRepositories([FromQuery] string keyword)
-    {
-        if (string.IsNullOrWhiteSpace(keyword))
+        public RepositoryController(IRepositoryService repositoryService)
         {
-            return BadRequest("Keyword is required.");
+            _repositoryService = repositoryService;
         }
 
-        var githubApiUrl = $"https://api.github.com/search/repositories?q={keyword}";
-        _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("GitHubSearchApp");
-
-        try
+        [HttpGet("search")]
+        [Authorize]
+        public async Task<IActionResult> SearchRepositories([FromQuery] string keyword)
         {
-            var response = await _httpClient.GetAsync(githubApiUrl);
-            if (!response.IsSuccessStatusCode)
+            if (string.IsNullOrWhiteSpace(keyword))
             {
-                return StatusCode((int)response.StatusCode, "Error fetching data from GitHub API.");
+                return BadRequest("Keyword is required.");
             }
 
-            var content = await response.Content.ReadAsStringAsync();
-            var repositories = JsonSerializer.Deserialize<object>(content);
-            return Ok(repositories);
+            try
+            {
+                var repositories = await _repositoryService.SearchRepositoriesAsync(keyword);
+                return Ok(repositories);
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
-        catch (Exception ex)
+
+        [HttpGet("GetSecureData")]
+        [Authorize(Roles = "admin")]
+        public IActionResult GetSecureData()
         {
-            return StatusCode(500, $"Server error: {ex.Message}");
+            return Ok(new { Message = "This is a secure endpoint!" });
         }
     }
-
-    [HttpGet("GetSecureData")]
-    [Authorize(Roles = "admin")]
-    public IActionResult GetSecureData()
-    {
-        return Ok(new { Message = "This is a secure endpoint!" });
-    }
-
- 
-
 }

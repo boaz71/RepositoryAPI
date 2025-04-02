@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using RepositoryAPI.Interfaces;
 using RepositoryAPI.Models;
 using RepositoryAPI.Services;
 using System.IdentityModel.Tokens.Jwt;
@@ -16,9 +17,9 @@ public class AuthController : ControllerBase
     
 {
 
-    private readonly AuthService _authService;
+    private readonly IAuthService _authService;
 
-    public AuthController(AuthService authService)
+    public AuthController(IAuthService authService)
     {
         _authService=authService;
     }
